@@ -2,9 +2,23 @@
 
 irccip implements Sony's InfraRed Compatible Control over Internet Protocol (IRCC-IP) for Bravia displays
 
+## Usage
+
+```go
+// Create a client to send commands to a remote display
+c := irccip.NewClient("http://192.168.1.12", "0000")
+
+// Send the 'Home' key code
+if err := c.SendKeyCode(irccip.KeyHome); err != nil {
+    log.Fatalf("SendKeyCode error: %v", err)
+}
+```
+
+## Key Codes
+
 The package contains key code constants taken from a `KDL-43W809C` TV
 
-## Finding new IRCC-IP key codes
+### Finding new IRCC-IP key codes
 
 Query your TV/Display, using the following command, to get a list of available key codes:
 

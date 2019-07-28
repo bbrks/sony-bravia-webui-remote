@@ -1,6 +1,7 @@
 package irccip
 
 import (
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -82,7 +83,8 @@ func TestSendKeyCode(t *testing.T) {
 				w.WriteHeader(tt.mockedResponseStatus)
 				w.Write(tt.mockedResponse)
 			}))
-			c := NewClient(backend.URL, testPSK, backend.Client())
+			c := NewClient(backend.URL, testPSK)
+			c.SetHTTPClient(backend.Client())
 
 			err := c.SendKeyCode(tt.key)
 			if err == nil {
@@ -96,5 +98,15 @@ func TestSendKeyCode(t *testing.T) {
 			backend.Close()
 		})
 
+	}
+}
+
+func ExampleSendKeyCode() {
+	// Create a client to send commands to a remote display
+	c := NewClient("http://192.168.1.12", "0000")
+
+	// Send the 'Home' key code
+	if err := c.SendKeyCode(KeyHome); err != nil {
+		log.Fatalf("SendKeyCode error: %v", err)
 	}
 }
