@@ -8,13 +8,14 @@ import (
 	"testing"
 )
 
-const testPSK = "0000"
+// testServerPSK is the PSK for the server used in the following tests.
+const testServerPSK = "0000"
 
 func TestSendKeyCode(t *testing.T) {
 	tests := []struct {
 		name                 string
 		key                  KeyCode
-		psk                  string
+		clientPSK            string
 		errorContains        string
 		mockedResponseStatus int
 		mockedResponse       []byte
@@ -22,7 +23,7 @@ func TestSendKeyCode(t *testing.T) {
 		{
 			name:                 "valid key",
 			key:                  KeyLeft,
-			psk:                  testPSK,
+			clientPSK:            testServerPSK,
 			errorContains:        "",
 			mockedResponseStatus: http.StatusOK,
 			mockedResponse: []byte(`<?xml version="1.0"?>
@@ -38,7 +39,7 @@ func TestSendKeyCode(t *testing.T) {
 		{
 			name:                 "invalid auth",
 			key:                  KeyLeft,
-			psk:                  "0001",
+			clientPSK:            "0001",
 			errorContains:        "HTTP error: 403 Forbidden",
 			mockedResponseStatus: http.StatusForbidden,
 			mockedResponse:       []byte(``),
@@ -46,7 +47,7 @@ func TestSendKeyCode(t *testing.T) {
 		{
 			name:                 "invalid key",
 			key:                  KeyLeft + "a",
-			psk:                  testPSK,
+			clientPSK:            testServerPSK,
 			errorContains:        "SOAP fault: Cannot accept the IRCC Code (800)",
 			mockedResponseStatus: http.StatusInternalServerError,
 			mockedResponse: []byte(`<?xml version="1.0"?>
@@ -71,22 +72,10 @@ func TestSendKeyCode(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			client, server := NewTestClientServer(tt.clientPSK, testServerPSK, tt.mockedResponseStatus, tt.mockedResponse)
+			defer server.Close()
 
-			backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				reqPSK := r.Header.Get(authHeaderName)
-				if reqPSK != testPSK {
-					w.WriteHeader(http.StatusForbidden)
-					w.Write([]byte(""))
-					return
-				}
-
-				w.WriteHeader(tt.mockedResponseStatus)
-				w.Write(tt.mockedResponse)
-			}))
-			c := NewClient(backend.URL, testPSK)
-			c.SetHTTPClient(backend.Client())
-
-			err := c.SendKeyCode(tt.key)
+			err := client.SendKeyCode(tt.key)
 			if err == nil {
 				if tt.errorContains != "" {
 					t.Fatalf("expected error to contain %q, but got no error", err.Error())
@@ -94,14 +83,41 @@ func TestSendKeyCode(t *testing.T) {
 			} else if !strings.Contains(err.Error(), tt.errorContains) {
 				t.Fatalf("error does not contain %q: %v", tt.errorContains, err)
 			}
-
-			backend.Close()
 		})
 
 	}
 }
 
-func ExampleSendKeyCode() {
+// NewTestClientServer returns a client and a test server for the given mocks.
+func NewTestClientServer(clientPSK, serverPSK string, mockedResponseStatus int, mockedResponse []byte) (client *Client, server *httptest.Server) {
+	server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Check the given path has the irccPath suffix
+		if !strings.HasSuffix(r.URL.Path, irccPath) {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte(""))
+			return
+		}
+
+		// Check auth key
+		reqPSK := r.Header.Get(authHeaderName)
+		if reqPSK != serverPSK {
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte(""))
+			return
+		}
+
+		// Return the mocked response
+		w.WriteHeader(mockedResponseStatus)
+		w.Write(mockedResponse)
+	}))
+
+	client = NewClient(server.URL, clientPSK)
+	client.SetHTTPClient(server.Client())
+
+	return client, server
+}
+
+func ExampleClient_SendKeyCode() {
 	// Create a client to send commands to a remote display
 	c := NewClient("http://192.168.1.12", "0000")
 
