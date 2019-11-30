@@ -1,3 +1,3 @@
-module sony-bravia-webui-remote
+module github.com/bbrks/sony-bravia-webui-remote
 
-go 1.12
+go 1.13
