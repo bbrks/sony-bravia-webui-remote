@@ -42,9 +42,14 @@
         button:hover {
             border: 5px solid rgba(0,0,0,0.5);
         }
-
         button:active {
             border: 10px solid rgba(0,0,0,0.5);
+        }
+
+        button:disabled {
+            background-color: #111 !important;
+            border: 0 !important;
+            cursor: not-allowed;
         }
 
         button[data-keyCode="AAAAAQAAAAEAAAAVAw=="] {
@@ -119,8 +124,8 @@
             <td colspan=6><button data-keyCode="AAAAAQAAAAEAAAAVAw==" onclick="sendKeyCode(this)">On/Off</button></td>
         </tr>
         <tr>
-            <td colspan=3><button data-keyCode="youtube" onclick="sendKeyCode(this)">YouTube</button></td>
-            <td colspan=3><button data-keyCode="twitch" onclick="sendKeyCode(this)">Twitch</button></td>
+            <td colspan=3><button data-keyCode="youtube" onclick="sendKeyCode(this)" disabled>YouTube</button></td>
+            <td colspan=3><button data-keyCode="twitch" onclick="sendKeyCode(this)" disabled>Twitch</button></td>
         </tr>
         <tr>
             <td colspan=2></td>
