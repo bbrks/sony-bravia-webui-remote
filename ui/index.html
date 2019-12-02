@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <style>
+        html {
+            height: 100%;
+        }
+        body {
+            background: #000;
+            color: #fff;
+            height: 100%;
+            margin: 0 auto;
+        }
+        
+        table {
+            table-layout: fixed;
+            width: 100%;
+            height: 100%;
+            border-collapse: collapse;
+        }
+        table, table tr, table th, table td {
+            border: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        button {
+            width: 100%;
+            height: 16.67vh;
+            background-color: #fff;
+            background-size: auto 50%;
+            background-position: center;
+            background-repeat: no-repeat;
+            border: 0px;
+            color: transparent;
+            cursor: pointer;
+        }
+
+        button:hover {
+            border: 5px solid rgba(0,0,0,0.5);
+        }
+
+        button:active {
+            border: 10px solid rgba(0,0,0,0.5);
+        }
+
+        button[data-keyCode="AAAAAQAAAAEAAAAVAw=="] {
+            background-color: #00a800;
+            background-image: url('res/fa-svg-solid/power-off.svg');
+        }
+
+        button[data-keyCode="AAAAAQAAAAEAAAB0Aw=="] {
+            border-radius: 25% 25% 0 0;
+            background-image: url('res/fa-svg-solid/arrow-alt-up.svg');
+        }
+        button[data-keyCode="AAAAAQAAAAEAAAB1Aw=="] {
+            border-radius: 0 0 25% 25%;
+            background-image: url('res/fa-svg-solid/arrow-alt-down.svg');
+        }
+        button[data-keyCode="AAAAAQAAAAEAAAA0Aw=="] {
+            border-radius: 25% 0 0 25%;
+            background-image: url('res/fa-svg-solid/arrow-alt-left.svg');
+        }
+        button[data-keyCode="AAAAAQAAAAEAAAAzAw=="] {
+            border-radius: 0 25% 25% 0;
+            background-image: url('res/fa-svg-solid/arrow-alt-right.svg');
+        }
+        button[data-keyCode="AAAAAQAAAAEAAABlAw=="] {
+            background-image: url('res/fa-svg-solid/circle.svg');
+        }
+
+        button[data-keyCode="AAAAAQAAAAEAAABgAw=="] {
+            background-color: #2d78d9;;
+            background-image: url('res/fa-svg-solid/home.svg');
+        }
+        button[data-keyCode="AAAAAgAAAJcAAAAjAw=="] {
+            background-color: grey;
+            background-image: url('res/fa-svg-solid/backspace.svg');
+        }
+
+        button[data-keyCode="youtube"] {
+            background-color: #ff0000;
+            background-image: url('res/fa-svg-brands/youtube.svg');
+        }
+        button[data-keyCode="twitch"] {
+            background-color: #a970ff;
+            background-image: url('res/fa-svg-brands/twitch.svg');
+        }
+    </style>
+
+    <script>
+        function sendKeyCode(btn) {
+            let keyCode = btn.getAttribute("data-keyCode");
+            console.log("sending key code:", keyCode);
+            let data = {"key_code":keyCode};
+
+            let xhr = new XMLHttpRequest();
+            xhr.open('POST', '/irccip/key');
+            xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+            xhr.send(JSON.stringify(data));
+
+            xhr.onloadend = function () {
+                if (xhr.status !== 200) {
+                    console.error('There was a problem with the request.');
+                }
+            };
+        }
+    </script>
+
+    <title>Sony Bravia TV remote</title>
+</head>
+<body>
+
+    <table>
+        <tr>
+            <td colspan=6><button data-keyCode="AAAAAQAAAAEAAAAVAw==" onclick="sendKeyCode(this)">On/Off</button></td>
+        </tr>
+        <tr>
+            <td colspan=3><button data-keyCode="youtube" onclick="sendKeyCode(this)">YouTube</button></td>
+            <td colspan=3><button data-keyCode="twitch" onclick="sendKeyCode(this)">Twitch</button></td>
+        </tr>
+        <tr>
+            <td colspan=2></td>
+            <td colspan=2><button data-keyCode="AAAAAQAAAAEAAAB0Aw==" onclick="sendKeyCode(this)">Up</button></td>
+            <td colspan=2></td>
+        </tr>
+        <tr>
+            <td colspan=2><button data-keyCode="AAAAAQAAAAEAAAA0Aw==" onclick="sendKeyCode(this)">Left</button></td>
+            <td colspan=2><button data-keyCode="AAAAAQAAAAEAAABlAw==" onclick="sendKeyCode(this)">OK</button></td>
+            <td colspan=2><button data-keyCode="AAAAAQAAAAEAAAAzAw==" onclick="sendKeyCode(this)">Right</button></td>
+        </tr>
+        <tr>
+            <td colspan=2></td>
+            <td colspan=2><button data-keyCode="AAAAAQAAAAEAAAB1Aw==" onclick="sendKeyCode(this)">Down</button></td>
+        </tr>
+        <tr>
+            <td colspan=3><button data-keyCode="AAAAAgAAAJcAAAAjAw==" onclick="sendKeyCode(this)">Back</button></td>
+            <td colspan=3><button data-keyCode="AAAAAQAAAAEAAABgAw==" onclick="sendKeyCode(this)">Home</button></td>
+        </tr>
+    </table>
+
+</body>
+</html>
