@@ -17,10 +17,10 @@ const (
 
 func main() {
 	envIP := os.Getenv("SONY_BRAVIA_IP")
-	flagIP := flag.String("ip", "", "Your Unique Property Reference Number (UPRN)")
+	flagIP := flag.String("ip", "", "The IP address of the Sony Bravia display")
 
 	envPSK := os.Getenv("SONY_BRAVIA_PSK")
-	flagPSK := flag.String("psk", "", "Your Unique Property Reference Number (UPRN)")
+	flagPSK := flag.String("psk", "", "The configured Pre-Shared-Key (PSK) of the Sony Bravia display")
 
 	flagBindAddr := flag.String("http", ":8080", "The address and/or port to bind to the HTTP server")
 	flagLogQuiet := flag.Bool("q", false, "Disables all logging except for errors")
