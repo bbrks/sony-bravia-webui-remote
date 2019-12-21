@@ -3,8 +3,11 @@ package main
 import (
 	"context"
 	"flag"
+	"net"
 	"net/http"
 	"os"
+
+	_ "net/http/pprof"
 
 	irccip "github.com/bbrks/irccip-go"
 	"github.com/julienschmidt/httprouter"
@@ -24,6 +27,7 @@ func main() {
 
 	flagBindAddr := flag.String("http", ":8080", "The address and/or port to bind to the HTTP server")
 	flagLogQuiet := flag.Bool("q", false, "Disables all logging except for errors")
+	flagPprofAddr := flag.String("pprof", "localhost:6060", "The address and/or port to bind to the pprof HTTP server")
 	flag.Parse()
 
 	s := server{
@@ -51,13 +55,34 @@ func main() {
 		os.Exit(1)
 	}
 
-	s.irccipClient = irccip.NewClient("http://"+ip, psk)
+	if *flagPprofAddr != "" {
+		l, err := net.Listen("tcp", *flagPprofAddr)
+		if err != nil {
+			s.Log(LevelError, ctx, "Error listening on %v: %v", *flagBindAddr, err)
+			os.Exit(1)
+		}
 
+		s.Log(LevelDebug, ctx, "Serving pprof at http://%s/debug/pprof/...", l.Addr().String())
+		go func() {
+			if err = http.Serve(l, nil); err != nil {
+				s.Log(LevelError, ctx, "Error from pprof HTTP server: %v", err)
+				os.Exit(1)
+			}
+		}()
+	}
+
+	s.irccipClient = irccip.NewClient("http://"+ip, psk)
 	s.routes()
 
-	s.Log(LevelInfo, ctx, "Starting server")
-	if err := http.ListenAndServe(*flagBindAddr, s.router); err != nil {
-		s.Log(LevelError, ctx, err.Error())
+	l, err := net.Listen("tcp", *flagBindAddr)
+	if err != nil {
+		s.Log(LevelError, ctx, "Error listening on %v: %v", *flagBindAddr, err)
+		os.Exit(1)
+	}
+
+	s.Log(LevelInfo, ctx, "Serving at http://%s", l.Addr().String())
+	if err := http.Serve(l, s.router); err != nil {
+		s.Log(LevelError, ctx, "Error from HTTP server: %v", err)
 		os.Exit(1)
 	}
 }
