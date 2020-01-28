@@ -81,7 +81,7 @@ func main() {
 	}
 
 	s.Log(LevelInfo, ctx, "Serving at http://%s", l.Addr().String())
-	if err := http.Serve(l, s.router); err != nil {
+	if err := http.Serve(l, s.middleware(s.router)); err != nil {
 		s.Log(LevelError, ctx, "Error from HTTP server: %v", err)
 		os.Exit(1)
 	}
