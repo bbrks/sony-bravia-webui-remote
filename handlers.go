@@ -29,6 +29,7 @@ func (s *server) handleKeyPress() http.HandlerFunc {
 		s.Log(LevelDebug, r.Context(), "sending key code: %s", req.KeyCode)
 		err = s.irccipClient.SendKeyCode(req.KeyCode)
 		if err != nil {
+			s.Log(LevelError, r.Context(), "SendKeyCode error: %v", err)
 			write(w, http.StatusBadRequest, []byte("SendKeyCode error: "+err.Error()))
 		}
 	}
